@@ -209,60 +209,39 @@ export default function PublishingDataCapture() {
                 </div>
                 <div>
                   <div className="font-medium text-gray-900">{distributionData.songwriter_name}</div>
-                  <div className="text-sm text-gray-500">{distributionData.songwriter_pro}</div>
+                  <div className="text-sm text-gray-500">{distributionData.songwriter_pro} {distributionData.songwriter_ipi ? `• ${distributionData.songwriter_ipi}` : ''}</div>
                 </div>
               </div>
             </div>
             
             <div className="space-y-3">
               <div 
-                onClick={() => { updateField('songwriterRole', 'self'); nextStep(); }}
+                onClick={() => { updateField('songwriterRole', 'self'); setStep(4); }}
                 className="p-4 rounded-xl border-2 border-gray-200 hover:border-gray-300 cursor-pointer transition-all"
               >
                 <div className="font-medium">I am the primary songwriter</div>
                 <div className="text-sm text-gray-500">The details above are correct</div>
               </div>
               <div 
-                onClick={() => updateField('songwriterRole', 'other')}
-                className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                  formData.songwriterRole === 'other' ? 'border-violet-500 bg-violet-50' : 'border-gray-200 hover:border-gray-300'
-                }`}
+                onClick={() => { updateField('songwriterRole', 'update'); nextStep(); }}
+                className="p-4 rounded-xl border-2 border-gray-200 hover:border-gray-300 cursor-pointer transition-all"
+              >
+                <div className="font-medium">I am the songwriter, but details need updating</div>
+                <div className="text-sm text-gray-500">Correct my name or IPI</div>
+              </div>
+              <div 
+                onClick={() => { 
+                  updateField('songwriterRole', 'other'); 
+                  updateField('songwriterName', '');
+                  updateField('ipi', '');
+                  nextStep(); 
+                }}
+                className="p-4 rounded-xl border-2 border-gray-200 hover:border-gray-300 cursor-pointer transition-all"
               >
                 <div className="font-medium">I'm registering on behalf of someone else</div>
                 <div className="text-sm text-gray-500">The primary songwriter is a different person</div>
               </div>
-              <div 
-                onClick={() => updateField('songwriterRole', 'update')}
-                className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                  formData.songwriterRole === 'update' ? 'border-violet-500 bg-violet-50' : 'border-gray-200 hover:border-gray-300'
-                }`}
-              >
-                <div className="font-medium">I am the songwriter, but details need updating</div>
-                <div className="text-sm text-gray-500">Correct my name or other information</div>
-              </div>
             </div>
-            
-            {(formData.songwriterRole === 'other' || formData.songwriterRole === 'update') && (
-              <div className="space-y-2 animate-in slide-in-from-bottom-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  {formData.songwriterRole === 'other' ? "Primary songwriter's full legal name" : "Your full legal name"}
-                </label>
-                <input
-                  type="text"
-                  value={formData.songwriterName}
-                  onChange={(e) => updateField('songwriterName', e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent"
-                  placeholder="As it appears on PRO registration"
-                />
-                <button
-                  onClick={nextStep}
-                  disabled={!formData.songwriterName}
-                  className="w-full py-3 px-4 bg-gray-900 text-white rounded-xl font-medium hover:bg-gray-800 transition-colors mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Continue
-                </button>
-              </div>
-            )}
           </div>
         );
 
@@ -270,188 +249,58 @@ export default function PublishingDataCapture() {
         return (
           <div className="space-y-6">
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">IPI Number</h2>
-              <p className="text-gray-500 mt-1">Your unique identifier for royalty collection</p>
+              <h2 className="text-xl font-semibold text-gray-900">
+                {formData.songwriterRole === 'other' ? 'Primary Songwriter Details' : 'Update Your Details'}
+              </h2>
+              <p className="text-gray-500 mt-1">
+                {formData.songwriterRole === 'other' 
+                  ? 'Enter the details of the primary songwriter' 
+                  : 'Correct your information below'}
+              </p>
             </div>
             
-            {distributionData.songwriter_ipi ? (
-              <>
-                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                  <div className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Your IPI</div>
-                  <div className="font-mono text-lg text-gray-900">{distributionData.songwriter_ipi}</div>
-                </div>
-                
-                <div className="space-y-3">
-                  <div 
-                    onClick={() => { updateField('ipiStatus', 'correct'); nextStep(); }}
-                    className="p-4 rounded-xl border-2 border-gray-200 hover:border-gray-300 cursor-pointer transition-all"
-                  >
-                    <span className="font-medium">This is correct</span>
-                  </div>
-                  <div 
-                    onClick={() => updateField('ipiStatus', 'update')}
-                    className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                      formData.ipiStatus === 'update' ? 'border-violet-500 bg-violet-50' : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <span className="font-medium">I need to update this</span>
-                  </div>
-                </div>
-                
-                {formData.ipiStatus === 'update' && (
-                  <div className="space-y-2 animate-in slide-in-from-bottom-2">
-                    <label className="block text-sm font-medium text-gray-700">Enter correct IPI</label>
-                    <input
-                      type="text"
-                      value={formData.ipi}
-                      onChange={(e) => updateField('ipi', e.target.value.replace(/\D/g, '').slice(0, 11))}
-                      className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent font-mono"
-                      placeholder="00123456789"
-                    />
-                    <p className="text-xs text-gray-500">9-11 digits</p>
-                    <button
-                      onClick={nextStep}
-                      disabled={formData.ipi.length < 9}
-                      className="w-full py-3 px-4 bg-gray-900 text-white rounded-xl font-medium hover:bg-gray-800 transition-colors mt-4 disabled:opacity-50"
-                    >
-                      Continue
-                    </button>
-                  </div>
-                )}
-              </>
-            ) : (
-              <>
-                <div className="space-y-3">
-                  <p className="text-gray-700">Do you have an IPI number?</p>
-                  <div 
-                    onClick={() => updateField('ipiStatus', 'update')}
-                    className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                      formData.ipiStatus === 'update' ? 'border-violet-500 bg-violet-50' : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <span className="font-medium">Yes, I have one</span>
-                  </div>
-                  <div 
-                    onClick={() => updateField('ipiStatus', 'none')}
-                    className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                      formData.ipiStatus === 'none' ? 'border-violet-500 bg-violet-50' : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <span className="font-medium">No / I don't know</span>
-                  </div>
-                </div>
-                
-                {formData.ipiStatus === 'update' && (
-                  <div className="space-y-2 animate-in slide-in-from-bottom-2">
-                    <label className="block text-sm font-medium text-gray-700">Enter your IPI</label>
-                    <input
-                      type="text"
-                      value={formData.ipi}
-                      onChange={(e) => updateField('ipi', e.target.value.replace(/\D/g, '').slice(0, 11))}
-                      className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent font-mono"
-                      placeholder="00123456789"
-                    />
-                    <button
-                      onClick={nextStep}
-                      disabled={formData.ipi.length < 9}
-                      className="w-full py-3 px-4 bg-gray-900 text-white rounded-xl font-medium hover:bg-gray-800 transition-colors mt-4 disabled:opacity-50"
-                    >
-                      Continue
-                    </button>
-                  </div>
-                )}
-                
-                {formData.ipiStatus === 'none' && (
-                  <div className="space-y-4 animate-in slide-in-from-bottom-2">
-                    <p className="text-gray-700">Are you registered with a PRO?</p>
-                    <div className="grid grid-cols-2 gap-3">
-                      <button
-                        onClick={() => updateField('hasProRegistration', true)}
-                        className={`p-4 rounded-xl border-2 transition-all ${
-                          formData.hasProRegistration === true ? 'border-violet-500 bg-violet-50' : 'border-gray-200 hover:border-gray-300'
-                        }`}
-                      >
-                        <span className="font-medium">Yes</span>
-                      </button>
-                      <button
-                        onClick={() => updateField('hasProRegistration', false)}
-                        className={`p-4 rounded-xl border-2 transition-all ${
-                          formData.hasProRegistration === false ? 'border-violet-500 bg-violet-50' : 'border-gray-200 hover:border-gray-300'
-                        }`}
-                      >
-                        <span className="font-medium">No</span>
-                      </button>
-                    </div>
-                    
-                    {formData.hasProRegistration === true && (
-                      <div className="space-y-4 animate-in slide-in-from-bottom-2">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">Which PRO?</label>
-                          <select
-                            value={formData.selectedPro}
-                            onChange={(e) => updateField('selectedPro', e.target.value)}
-                            className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent"
-                          >
-                            <option value="">Select PRO...</option>
-                            {pros.map(pro => <option key={pro} value={pro}>{pro}</option>)}
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">Member number</label>
-                          <input
-                            type="text"
-                            value={formData.proMemberNumber}
-                            onChange={(e) => updateField('proMemberNumber', e.target.value)}
-                            className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent"
-                            placeholder="We'll use this to find your IPI"
-                          />
-                        </div>
-                        <button
-                          onClick={nextStep}
-                          disabled={!formData.selectedPro || !formData.proMemberNumber}
-                          className="w-full py-3 px-4 bg-gray-900 text-white rounded-xl font-medium hover:bg-gray-800 transition-colors disabled:opacity-50"
-                        >
-                          Continue
-                        </button>
-                      </div>
-                    )}
-                    
-                    {formData.hasProRegistration === false && (
-                      <div className="animate-in slide-in-from-bottom-2">
-                        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-                          <div className="flex gap-3">
-                            <svg className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                            </svg>
-                            <div>
-                              <p className="font-medium text-amber-800">PRO registration required</p>
-                              <p className="text-sm text-amber-700 mt-1">
-                                To collect publishing royalties, you'll need to register with a PRO. We'll save your details and send guidance.
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                        <button
-                          onClick={nextStep}
-                          className="w-full py-3 px-4 bg-gray-900 text-white rounded-xl font-medium hover:bg-gray-800 transition-colors mt-4"
-                        >
-                          Continue anyway
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </>
-            )}
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Full legal name</label>
+                <input
+                  type="text"
+                  value={formData.songwriterName}
+                  onChange={(e) => updateField('songwriterName', e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                  placeholder="As it appears on PRO registration"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">IPI number</label>
+                <input
+                  type="text"
+                  value={formData.ipi}
+                  onChange={(e) => updateField('ipi', e.target.value.replace(/\D/g, '').slice(0, 11))}
+                  className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent font-mono"
+                  placeholder="9-11 digits (optional)"
+                />
+                <p className="text-xs text-gray-500 mt-1">Leave blank if unknown</p>
+              </div>
+            </div>
+            
+            <button
+              onClick={() => setStep(4)}
+              disabled={!formData.songwriterName}
+              className="w-full py-3 px-4 bg-gray-900 text-white rounded-xl font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Continue
+            </button>
           </div>
         );
 
       case 4:
+        // Ownership split - same for all paths
         return (
           <div className="space-y-6">
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">Your Ownership Split</h2>
-              <p className="text-gray-500 mt-1">What percentage of this composition do you own?</p>
+              <h2 className="text-xl font-semibold text-gray-900">Ownership Split</h2>
+              <p className="text-gray-500 mt-1">What percentage of this composition does {formData.songwriterRole === 'other' ? formData.songwriterName : 'the primary writer'} own?</p>
             </div>
             
             <div>
@@ -467,7 +316,7 @@ export default function PublishingDataCapture() {
                 />
                 <span className="text-xl text-gray-500">%</span>
               </div>
-              <p className="text-sm text-gray-500 mt-2">If you're the sole writer, enter 100</p>
+              <p className="text-sm text-gray-500 mt-2">If they're the sole writer, enter 100</p>
             </div>
             
             <button
@@ -886,6 +735,40 @@ export default function PublishingDataCapture() {
                   className="w-full py-3 px-4 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white rounded-xl font-medium hover:from-violet-700 hover:to-fuchsia-700 transition-all"
                 >
                   Submit Publishing Information
+                </button>
+                
+                <button
+                  onClick={() => {
+                    setStep(0);
+                    setFormData({
+                      altTitlesCorrect: null,
+                      additionalAltTitles: "",
+                      songwriterRole: null,
+                      songwriterName: distributionData.songwriter_name,
+                      ipiStatus: null,
+                      ipi: distributionData.songwriter_ipi,
+                      hasProRegistration: null,
+                      selectedPro: "",
+                      proMemberNumber: "",
+                      ownershipSplit: "",
+                      publisherStatus: null,
+                      publisherName: distributionData.songwriter_publisher,
+                      publisherIpi: distributionData.songwriter_publisher_ipi,
+                      hasCoWriters: null,
+                      coWriterCount: 1,
+                      coWriters: [
+                        { name: "", ipi: "", split: "", publisher: "" },
+                        { name: "", ipi: "", split: "", publisher: "" },
+                        { name: "", ipi: "", split: "", publisher: "" },
+                        { name: "", ipi: "", split: "", publisher: "" }
+                      ],
+                      hasSamples: null,
+                      sampleDetails: ""
+                    });
+                  }}
+                  className="w-full py-3 px-4 text-gray-500 hover:text-gray-700 font-medium transition-colors"
+                >
+                  Start over
                 </button>
               </>
             )}
